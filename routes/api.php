@@ -10,6 +10,13 @@ use App\Http\Controllers\DistribuidorController;
 use App\Http\Controllers\AltaPacienteController;
 use App\Http\Controllers\ConsultaController;
 
+use App\Http\Controllers\DashboardFarmaciaController;
+
+
+
+//Dashboard Farmacia
+\Route::get('/dashboard-farmacia', [DashboardFarmaciaController::class, 'index']);
+
 ////////especialidades//////////
 Route::get('/especialidades', [EspecialidadController::class, 'index']);
 Route::post('/especialidades', [EspecialidadController::class, 'store']);
@@ -18,6 +25,8 @@ Route::post('/especialidades', [EspecialidadController::class, 'store']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 /////medicamentos////////////////
 Route::get('/medicamentos', [MedicamentoController::class, 'listado'])->name('index_medicamentos');

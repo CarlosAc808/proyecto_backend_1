@@ -9,6 +9,8 @@ use App\Models\Clinica;
 use App\Models\Farmacia;
 use App\Models\Especialidad;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
@@ -17,20 +19,26 @@ class AuthController extends Controller
     public function register(Request $request)
     {
 
-        $request->validate([
-            'nombre' => 'required|string|max:120',
-            'correo' => 'required|email|unique:usuarios,correo',
-            'telefono' => 'nullable|string|max:20',
-            'password' => 'required|min:6',
-            'rol_id' => 'required|exists:roles,id',
+$request->validate([
+    'nombre' => 'required|string|max:120',
+    'correo' => 'required|email|unique:usuarios,correo',
+    'telefono' => 'nullable|string|max:20',
+    'password' => 'required|min:6',
+    'rol_id' => 'required|exists:roles,id',
+    'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
 
-            // extras
-            'nombre_clinica' => 'nullable|string|max:150',
-            'direccion' => 'nullable|string',
-            'especialidad_id' => 'nullable',
-            'especialidad_nombre' => 'nullable|string|max:150',
-            'cedula_profesional' => 'nullable|string|max:30',
-        ]);
+    // extras
+    'nombre_clinica' => 'nullable|string|max:150',
+    'direccion' => 'nullable|string',
+    'ciudad' => 'nullable|string|max:80',
+    'estado' => 'nullable|string|max:80',
+    'pais' => 'nullable|string|max:80',
+
+    'especialidad_id' => 'nullable',
+    'especialidad_nombre' => 'nullable|string|max:150',
+    'cedula_profesional' => 'nullable|string|max:30',
+    'anios_exp' => 'nullable|integer|min:0',
+]);
 
         DB::beginTransaction();
 
@@ -82,6 +90,7 @@ if ($request->rol_id == 3) {
                     'direccion' => $request->direccion,
                     'ciudad' => $request->ciudad,
                     'estado' => $request->estado,
+                    'pais' => $request->pais ?? 'México',
                     'telefono' => $request->telefono
                 ]);
 
@@ -95,6 +104,19 @@ if ($request->rol_id == 3) {
             }
 
             DB::commit();
+
+             if ($request->hasFile('foto')) {
+
+    $archivo = $request->file('foto');
+
+    $nombre_archivo = 'usuario-'.$usuario->id.'.'.$archivo->getClientOriginalExtension();
+
+    $archivo->storeAs('fotos/usuarios', $nombre_archivo, 'public');
+
+    $usuario->foto_url = $nombre_archivo;
+    $usuario->save();
+}
+
 
             $token = $usuario->createToken('token')->plainTextToken;
 
@@ -190,4 +212,29 @@ if ($request->rol_id == 3) {
             'mensaje' => 'Todas las sesiones cerradas'
         ]);
     }
+
+    public function forgotPassword(Request $request)
+{
+    $request->validate([
+        'correo' => 'required|email'
+    ]);
+
+    $usuario = Usuario::where('correo', $request->correo)->first();
+
+    if (!$usuario) {
+        return response()->json(['mensaje' => 'Correo no encontrado'], 404);
+    }
+
+    $token = Str::random(60);
+
+    DB::table('password_resets')->updateOrInsert(
+        ['correo' => $request->correo],
+        ['token' => $token, 'created_at' => now()]
+    );
+
+    return response()->json([
+        'mensaje' => 'Token generado',
+        'token' => $token //  solo para pruebas
+    ]);
+}
 }

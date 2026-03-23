@@ -18,48 +18,13 @@ class DistribuidorController extends Controller
 
 
 
-     public function addDistribuidor(Request $request)
-    {
-        $data = $request->all();
-
-        $distribuidor = new Distribuidor();
-
-        $distribuidor->nombre = $data['nombre'];
-        $distribuidor->rfc = $data['rfc'];
-        $distribuidor->categoria = $data['categoria'];
-        $distribuidor->contacto = $data['contacto'];
-        $distribuidor->correo = $data['correo'];
-        $distribuidor->telefono = $data['telefono'];
-        $distribuidor->direccion = $data['direccion'];
-        $distribuidor->entrega = $data['entrega'];
-        $distribuidor->ciudad = $data['ciudad'];
-        $distribuidor->pago = $data['pago'];
-
-        $distribuidor->save();
-
-        return response()->json([
-            'message' => 'Distribuidor guardado con éxito',
-            'id' => $distribuidor->id
-        ], 201);
-    }
-
-
-
-        public function deleteDistribuidor($id) {
-        // Se busca el registro de la tabla
-        // "SELECT * FROM formularios WHERE id=1"
-        $distribuidor = Distribuidor::find($id);
-        // Se ejecuta el método delete
-        // "DELETE FROM formularios WHERE id=1"
-        $distribuidor->delete();
-    }
-
-
-
-    public function putApiUpdateDistribuidor($id, Request $request){
+public function addDistribuidor(Request $request)
+{
     $data = $request->all();
 
-    $distribuidor = Distribuidor::find($id);
+    $distribuidor = new Distribuidor();
+
+    $distribuidor->farmacia_id = $data['farmacia_id'] ?? 1; //  obligatorio
     $distribuidor->nombre = $data['nombre'];
     $distribuidor->rfc = $data['rfc'];
     $distribuidor->categoria = $data['categoria'];
@@ -67,14 +32,64 @@ class DistribuidorController extends Controller
     $distribuidor->correo = $data['correo'];
     $distribuidor->telefono = $data['telefono'];
     $distribuidor->direccion = $data['direccion'];
-    $distribuidor->entrega = $data['entrega'];
+    $distribuidor->ciudad = $data['ciudad'];
+    $distribuidor->creado_en = hoy(); //  tu helper
+
+    $distribuidor->save();
+
+    return response()->json([
+        'message' => 'Distribuidor guardado con éxito',
+        'id' => $distribuidor->id
+    ], 201);
+}
+
+
+
+     public function deleteDistribuidor($id)
+{
+    $distribuidor = Distribuidor::find($id);
+
+    if (!$distribuidor) {
+        return response()->json([
+            'message' => 'Distribuidor no encontrado'
+        ], 404);
+    }
+
+    $distribuidor->delete();
+
+    return response()->json([
+        'message' => 'Distribuidor eliminado correctamente'
+    ]);
+}
+
+
+
+public function putApiUpdateDistribuidor($id, Request $request)
+{
+    $data = $request->all();
+
+    $distribuidor = Distribuidor::find($id);
+
+    if (!$distribuidor) {
+        return response()->json([
+            'message' => 'Distribuidor no encontrado'
+        ], 404);
+    }
+
+    $distribuidor->nombre = $data['nombre'];
+    $distribuidor->rfc = $data['rfc'];
+    $distribuidor->categoria = $data['categoria'];
+    $distribuidor->contacto = $data['contacto'];
+    $distribuidor->correo = $data['correo'];
+    $distribuidor->telefono = $data['telefono'];
+    $distribuidor->direccion = $data['direccion'];
     $distribuidor->ciudad = $data['ciudad'];
 
     $distribuidor->save();
 
-   return response()->json([
-    'message' => 'Distribuidor actualizado correctamente',
-    'distribuidor' => $distribuidor
-]);
+    return response()->json([
+        'message' => 'Distribuidor actualizado correctamente',
+        'distribuidor' => $distribuidor
+    ]);
 }
 }

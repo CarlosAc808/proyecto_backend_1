@@ -8,7 +8,10 @@ class Distribuidor extends Model
 {
     protected $table = 'distribuidores';
 
+    public $timestamps = false; //  IMPORTANTE (no usas created_at)
+
     protected $fillable = [
+        'farmacia_id',
         'nombre',
         'rfc',
         'categoria',
@@ -16,8 +19,7 @@ class Distribuidor extends Model
         'correo',
         'telefono',
         'direccion',
-        'entrega',
         'ciudad',
-        'pago'
+        'creado_en'
     ];
 }

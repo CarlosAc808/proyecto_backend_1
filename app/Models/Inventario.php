@@ -21,4 +21,9 @@ class Inventario extends Model
     ];
 
     public $timestamps = false;
+
+    public function medicamento()
+{
+    return $this->belongsTo(Medicamento::class);
+}
 }
