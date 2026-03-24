@@ -26,21 +26,22 @@ return new class extends Migration
                   ->constrained('doctores')
                   ->nullOnDelete();
 
-            //  DATOS GENERALES
-            $table->date('fecha_nacimiento')->nullable();
-            $table->string('genero', 10)->nullable();
-            $table->string('tipo_sangre', 5)->nullable();
+            $table->date('nacimiento')->nullable();
+                $table->string('genero')->nullable();
 
-            //  DATOS MÉDICOS
-            $table->text('alergias')->nullable();
-            $table->text('antecedentes')->nullable(); // heredofamiliar
+                // Contacto
+                $table->string('telefono')->nullable();
+                $table->string('correo')->nullable();
+                $table->string('direccion')->nullable();
+                $table->string('colonia')->nullable();
+                $table->string('ciudad')->nullable();
+                $table->string('estado')->nullable();
+                $table->string('codigoPostal')->nullable();
 
-            //  DIRECCIÓN COMPLETA (LO QUE FALTABA)
-            $table->text('direccion')->nullable();
-            $table->string('colonia')->nullable();
-            $table->string('ciudad')->nullable();
-            $table->string('estado')->nullable();
-            $table->string('codigo_postal')->nullable();
+                // Médico
+                $table->string('tipoSangre')->nullable();
+                $table->text('alergias')->nullable();
+                $table->text('padecimientoHeredofamiliar')->nullable();
 
             //  CONTROL
             $table->boolean('activo')->default(true);

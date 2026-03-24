@@ -11,11 +11,11 @@ use App\Http\Controllers\AltaPacienteController;
 use App\Http\Controllers\ConsultaController;
 
 use App\Http\Controllers\DashboardFarmaciaController;
-
+use App\Http\Controllers\PacienteController;
 
 
 //Dashboard Farmacia
-\Route::get('/dashboard-farmacia', [DashboardFarmaciaController::class, 'index']);
+Route::get('/dashboard-farmacia', [DashboardFarmaciaController::class, 'index']);
 
 ////////especialidades//////////
 Route::get('/especialidades', [EspecialidadController::class, 'index']);
@@ -55,6 +55,9 @@ Route::put("UpdateDistribuidor/{id}",[DistribuidorController::class, "putApiUpda
 //-------------------------------------------prueba Doctores-------------------------------------------------
 Route::post('/AltaPaciente', [AltaPacienteController::class, 'addPaciente']);
 Route::get('/MostrarPaciente', [AltaPacienteController::class, 'getApiPaciente']);
+
+
+Route::post('/PACIENTE', [PacienteController::class, 'addPaciente']);
 
 
 //-------------------------------------------Consulta--------------------------------------------------------
