@@ -8,23 +8,22 @@ class AltaPaciente extends Model
 {
     protected $table = 'pacientes';
 
-    protected $fillable = [
-        'nombre',
-        'apellidoP',
-        'apellidoM',
-        'nacimiento',
-        'genero',
-        'telefono',
-        'correo',
-        'direccion',
-        'colonia',
-        'ciudad',
-        'estado',
-        'codigoPostal',
-        'tipoSangre',
-        'alergias',
-        'padecimientoHeredofamiliar'
-    ];
+protected $fillable = [
+    'usuario_id',
+    'doctor_id', // AGREGA ESTE
+    'nacimiento',
+    'genero',
+    'telefono',
+    'correo',
+    'direccion',
+    'colonia',
+    'ciudad',
+    'estado',
+    'codigoPostal',
+    'tipoSangre',
+    'alergias',
+    'padecimientoHeredofamiliar'
+];
 
         public function consultas()
     {

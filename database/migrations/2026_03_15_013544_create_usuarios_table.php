@@ -20,7 +20,7 @@ Schema::create('usuarios', function (Blueprint $table) {
     $table->text('foto_url')->nullable();
     $table->string('password')->nullable();
     $table->boolean('activo')->default(true);
-    $table->timestamps('creado_en', 'actualizado_en');
+    $table->timestamps();
 });
     }
 
