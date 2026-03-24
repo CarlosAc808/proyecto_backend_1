@@ -54,6 +54,10 @@ Route::post('/AddConsulta', [ConsultaController::class, 'addConsulta']);
 Route::get('/MostrarConsulta', [ConsultaController::class, 'getApiConsulta']);
 
 
+///erick
+Route::get('/consultas/{pacienteId}', [ConsultaController::class, 'getByPaciente']);
+
+
 
 
 

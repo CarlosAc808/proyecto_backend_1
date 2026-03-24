@@ -44,4 +44,16 @@ class ConsultaController extends Controller
     $consulta = Consulta::with('paciente')->get();
     return response()->json($consulta);
     }
+
+
+public function getByPaciente($pacienteId)
+{
+    $consultas = Consulta::where('pacienteId', $pacienteId)
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    return response()->json([
+        'consultas' => $consultas
+    ]);
+}
 }
