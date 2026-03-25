@@ -11,11 +11,11 @@ class Paciente extends Model
     protected $fillable = [
         'usuario_id',
         'doctor_id',
-        'fecha_nacimiento',
+        'nacimiento',
         'genero',
-        'tipo_sangre',
+        'tipoSangre',
         'alergias',
-        'antecedentes',
+        'padecimientoHeredofamiliar',
         'direccion',
         'creado_en'
     ];
@@ -49,4 +49,5 @@ class Paciente extends Model
     {
         return $this->hasMany(Consulta::class, 'paciente_id');
     }
+   
 }

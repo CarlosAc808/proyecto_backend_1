@@ -65,6 +65,9 @@ Route::get('/MostrarConsulta', [ConsultaController::class, 'getApiConsulta']);
 
 ///erick
 Route::get('/consultas/{pacienteId}', [ConsultaController::class, 'getByPaciente']);
+use App\Http\Controllers\PerfilController;
+
+Route::get('/perfil/{id}', [PerfilController::class, 'obtenerPerfil']);
 
 
 
