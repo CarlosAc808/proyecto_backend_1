@@ -10,8 +10,8 @@ class ConsultaController extends Controller
     public function addConsulta(Request $request)
 {
     $validated = $request->validate([
-        'paciente_id' => 'required|exists:pacientes,id',
-        'cita_id' => 'required|exists:citas,id',
+        'paciente_id' => 'nullable|exists:pacientes,id',
+        'cita_id' => 'nullable|exists:citas,id',
         'doctor_id' => 'nullable|exists:doctores,id',
         'motivo' => 'required|string',
         'sintomas' => 'nullable|string',
@@ -20,7 +20,12 @@ class ConsultaController extends Controller
         'fecha_tratamiento' => 'nullable|date',
     ]);
 
-    $paciente = AltaPaciente::find($validated['paciente_id']);
+    // Asignar valores por defecto = 1
+    $pacienteId = $validated['paciente_id'] ?? 1;
+    $citaId = $validated['cita_id'] ?? 1;
+    $doctorId = $validated['doctor_id'] ?? 1;
+
+    $paciente = AltaPaciente::find($pacienteId);
     if (!$paciente) {
         return response()->json(['error' => 'Paciente no encontrado'], 404);
     }
@@ -45,7 +50,7 @@ class ConsultaController extends Controller
      public function getApiConsulta() {
      // Se usa el método all para obtener todos los formularios
      // "SELECT * FROM formularios"
-    $consulta = Consulta::with('paciente', 'cita', 'doctor')->get();
+    $consulta = Consulta::with('paciente.usuario', 'cita', 'doctor')->get();
     return response()->json($consulta);
     }
 }
