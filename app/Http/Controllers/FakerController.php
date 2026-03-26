@@ -10,6 +10,8 @@ use App\Models\Paciente;
 use App\Models\Doctor;
 use App\Models\Cita;
 use App\Models\Consulta;
+use App\Models\Clinica;
+use App\Models\Farmacia;
 use App\Models\Medicamento;
 use App\Models\Inventario;
 use App\Models\Receta;
@@ -19,120 +21,172 @@ use App\Models\MovimientoInventario;
 class FakerController extends Controller
 {
 
-    public function generarDatos()
-    {
-        $faker = Faker::create('es_MX');
-        $password = bcrypt('123456');
+public function generarDatos()
+{
+    $faker = Faker::create('es_MX');
+    $password = bcrypt('123456');
 
-        // ============================
-        // 1. CREAR USUARIOS PACIENTES
-        // ============================
-        for ($i = 0; $i < 50; $i++) {
+    // ============================
+    // 1. USUARIOS ADMIN (opcional)
+    // ============================
+    Usuario::firstOrCreate([
+        'correo' => 'admin@demo.com'
+    ], [
+        'rol_id' => 1,
+        'nombre' => 'Admin',
+        'telefono' => '9999999999',
+        'password' => $password,
+        'activo' => 1
+    ]);
 
-            $usuario = Usuario::create([
-                'rol_id' => 2, // Paciente
-                'nombre' => $faker->name,
-                'correo' => $faker->unique()->safeEmail,
-                'telefono' => $faker->phoneNumber,
-                'password' => $password,
-                'activo' => 1
-            ]);
+    // ============================
+    // 2. CLINICAS + FARMACIAS
+    // ============================
+    $clinicas = [];
 
-            Paciente::create([
-                'usuario_id' => $usuario->id,
-                'fecha_nacimiento' => $faker->date(),
-                'genero' => $faker->randomElement(['M', 'F']),
-                'tipo_sangre' => $faker->randomElement(['A+', 'O+', 'B+', 'AB+']),
-                'alergias' => $faker->sentence,
-                'antecedentes' => $faker->sentence,
-                'direccion' => $faker->address
-            ]);
-        }
+    for ($i = 0; $i < 3; $i++) {
 
-        // ============================
-        // 2. CREAR USUARIOS DOCTORES
-        // ============================
-        for ($i = 0; $i < 10; $i++) {
+        $usuarioClinica = Usuario::create([
+            'rol_id' => 4,
+            'nombre' => 'Clínica ' . $faker->company,
+            'correo' => $faker->unique()->safeEmail,
+            'telefono' => $faker->phoneNumber,
+            'password' => $password,
+            'activo' => 1
+        ]);
 
-            $usuario = Usuario::create([
-                'rol_id' => 3, // Doctor
-                'nombre' => $faker->name,
-                'correo' => $faker->unique()->safeEmail,
-                'telefono' => $faker->phoneNumber,
-                'password' => $password,
-                'activo' => 1
-            ]);
+        $clinica = Clinica::create([
+            'usuario_id' => $usuarioClinica->id,
+            'nombre' => 'Clínica ' . $faker->company,
+            'direccion' => $faker->address,
+            'ciudad' => $faker->city,
+            'estado' => $faker->state,
+            'pais' => 'México',
+            'telefono' => $faker->phoneNumber
+        ]);
 
-            Doctor::create([
-                'usuario_id' => $usuario->id,
-                'clinica_id' => 1,
-                'especialidad_id' => $faker->randomElement([2,3]),
-                'cedula_profesional' => $faker->numerify('######'),
-                'anios_exp' => $faker->numberBetween(1, 40),
-                'telefono' => $faker->phoneNumber
-            ]);
-        }
+        // FARMACIA ligada a clínica
+        $usuarioFarmacia = Usuario::create([
+            'rol_id' => 4,
+            'nombre' => 'Farmacia ' . $faker->company,
+            'correo' => $faker->unique()->safeEmail,
+            'telefono' => $faker->phoneNumber,
+            'password' => $password,
+            'activo' => 1
+        ]);
 
-        // ============================
-        // 3. CREAR CITAS
-        // ============================
-        $pacientes = Paciente::all();
-        $doctores = Doctor::all();
+        Farmacia::create([
+            'usuario_id' => $usuarioFarmacia->id,
+            'clinica_id' => $clinica->id,
+            'nombre' => 'Farmacia ' . $faker->company,
+            'direccion' => $faker->address,
+            'telefono' => $faker->phoneNumber
+        ]);
 
-        foreach ($pacientes as $paciente) {
+        $clinicas[] = $clinica;
+    }
 
-            $doctor = $doctores->random();
+    // ============================
+    // 3. DOCTORES
+    // ============================
+    $doctores = [];
 
-            $fechaInicio = $faker->dateTimeBetween('-1 month', '+1 month');
+    for ($i = 0; $i < 10; $i++) {
 
-            $cita = Cita::create([
+        $usuario = Usuario::create([
+            'rol_id' => 3,
+            'nombre' => $faker->name,
+            'correo' => $faker->unique()->safeEmail,
+            'telefono' => $faker->phoneNumber,
+            'password' => $password,
+            'activo' => 1
+        ]);
+
+        $clinica = collect($clinicas)->random();
+
+        $doctor = Doctor::create([
+            'usuario_id' => $usuario->id,
+            'clinica_id' => $clinica->id,
+            'especialidad_id' => $faker->randomElement([1,2,3]),
+            'cedula_profesional' => $faker->numerify('######'),
+            'anios_exp' => $faker->numberBetween(1, 40),
+            'telefono' => $faker->phoneNumber
+        ]);
+
+        $doctores[] = $doctor;
+    }
+
+    // ============================
+    // 4. PACIENTES
+    // ============================
+    $pacientes = [];
+
+    for ($i = 0; $i < 50; $i++) {
+
+        $usuario = Usuario::create([
+            'rol_id' => 2,
+            'nombre' => $faker->name,
+            'correo' => $faker->unique()->safeEmail,
+            'telefono' => $faker->phoneNumber,
+            'password' => $password,
+            'activo' => 1
+        ]);
+
+        $doctorRandom = collect($doctores)->random();
+
+        $paciente = Paciente::create([
+            'usuario_id' => $usuario->id,
+            'doctor_id' => $doctorRandom->id,
+            'nacimiento' => $faker->date(),
+            'genero' => $faker->randomElement(['M', 'F']),
+            'telefono' => $faker->phoneNumber,
+            'correo' => $faker->email,
+            'direccion' => $faker->address,
+            'ciudad' => $faker->city,
+            'estado' => $faker->state,
+            'tipoSangre' => $faker->randomElement(['A+', 'O+', 'B+', 'AB+']),
+            'alergias' => $faker->sentence,
+            'padecimientoHeredofamiliar' => $faker->sentence
+        ]);
+
+        $pacientes[] = $paciente;
+    }
+
+    // ============================
+    // 5. CITAS + CONSULTAS
+    // ============================
+    foreach ($pacientes as $paciente) {
+
+        $doctor = collect($doctores)->random();
+
+        $fechaInicio = $faker->dateTimeBetween('-1 month', '+1 month');
+
+        $cita = Cita::create([
+            'doctor_id' => $doctor->id,
+            'paciente_id' => $paciente->id,
+            'clinica_id' => $doctor->clinica_id,
+            'fecha_inicio' => $fechaInicio,
+            'fecha_fin' => (clone $fechaInicio)->modify('+30 minutes'),
+            'estado' => $faker->randomElement(['pendiente', 'completada', 'cancelada']),
+            'motivo' => $faker->sentence
+        ]);
+
+        if ($cita->estado === 'completada') {
+
+            Consulta::create([
+                'cita_id' => $cita->id,
                 'doctor_id' => $doctor->id,
                 'paciente_id' => $paciente->id,
-                'clinica_id' => 1,
-                'fecha_inicio' => $fechaInicio,
-                'fecha_fin' => (clone $fechaInicio)->modify('+30 minutes'),
-                'estado' => $faker->randomElement(['pendiente', 'completada', 'cancelada']),
-                'motivo' => $faker->sentence
-            ]);
-
-            // ============================
-            // 4. CREAR CONSULTAS
-            // ============================
-    if ($cita && $cita->estado == 'completada') {
-
-    Consulta::create([
-        'cita_id' => $cita->id,
-        'doctor_id' => $doctor->id,
-        'paciente_id' => $paciente->id,
-        'sintomas' => $faker->sentence,
-        'diagnostico' => $faker->sentence,
-        'notas_clinicas' => $faker->paragraph
-    ]);
-}
-        }
-
-        // ============================
-        // 5. INVENTARIO SIMPLE
-        // ============================
-        $medicamentos = Medicamento::all();
-
-        foreach ($medicamentos as $med) {
-
-            Inventario::create([
-                'farmacia_id' => 1,
-                'medicamento_id' => $med->id,
-                'distribuidor_id' => 1,
-                'stock' => $faker->numberBetween(10, 500),
-                'stock_minimo' => 5,
-                'precio_compra' => $faker->randomFloat(2, 10, 50),
-                'precio_venta' => $faker->randomFloat(2, 60, 150),
-                'lote' => strtoupper($faker->bothify('LOT###??')),
-                'fecha_caducidad' => $faker->dateTimeBetween('+6 months', '+2 years')
+                'sintomas' => $faker->sentence,
+                'diagnostico' => $faker->sentence,
+                'notas_clinicas' => $faker->paragraph
             ]);
         }
-
-        return "Datos generados correctamente con Faker.";
     }
+
+
+    return "Seeder completo generado correctamente con Faker";
+}
 
 
 public function generarMedicamentosFake()

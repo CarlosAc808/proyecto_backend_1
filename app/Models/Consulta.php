@@ -10,17 +10,18 @@ class Consulta extends Model
 
     protected $fillable = [
         'cita_id', 
+        'doctor_id',
         'paciente_id',
         'motivo',
         'sintomas',
-        'notas',
+        'diagnostico',
+        'notas_clinicas',
         'examen',
-        'fecha_tratamiento'
+        'fecha_tratamiento',
     ];
 
-        //  ESTA ES LA CLAVE
-    const CREATED_AT = 'creado_en';
-    const UPDATED_AT = null;
+    //  Laravel estándar
+    public $timestamps = true;
 
     public function paciente()
     {
