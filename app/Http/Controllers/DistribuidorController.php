@@ -17,6 +17,15 @@ class DistribuidorController extends Controller
     }
 
 
+    public function getDistribuidoresSelect()
+{
+    $distribuidores = Distribuidor::select('id', 'nombre')->get();
+
+    return response()->json([
+        'data' => $distribuidores
+    ]);
+}
+
 
 public function addDistribuidor(Request $request)
 {

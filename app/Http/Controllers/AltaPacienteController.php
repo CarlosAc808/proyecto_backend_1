@@ -58,4 +58,19 @@ public function addPaciente(Request $request)
     ]);
 }
 
+
+public function getApiPaciente()
+{
+    $pacientes = AltaPaciente::with('usuario')->get();
+
+    return response()->json([
+        "paciente" => $pacientes->map(function ($p) {
+            return [
+                "id" => $p->id,
+                "nombre" => $p->usuario->nombre ?? ''
+            ];
+        })
+    ]);
+}
+
 }

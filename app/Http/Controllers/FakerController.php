@@ -135,11 +135,10 @@ class FakerController extends Controller
     }
 
 
-    public function generarMedicamentosFake()
+public function generarMedicamentosFake()
 {
     $faker = Faker::create('es_MX');
 
-    // Obtener categorías existentes
     $categorias = \App\Models\Categoria::all();
 
     if ($categorias->isEmpty()) {
@@ -148,9 +147,6 @@ class FakerController extends Controller
 
     for ($i = 0; $i < 30; $i++) {
 
-        // ============================
-        // 1. CREAR MEDICAMENTO
-        // ============================
         $medicamento = Medicamento::create([
             'nombre' => $faker->randomElement([
                 'Paracetamol', 'Ibuprofeno', 'Amoxicilina',
@@ -158,37 +154,22 @@ class FakerController extends Controller
             ]) . ' ' . $faker->randomElement(['500mg', '250mg', '100mg']),
 
             'categoria_id' => $categorias->random()->id,
-
-            'sustancia_activa' => $faker->randomElement([
-                'Paracetamol', 'Ibuprofeno', 'Amoxicilina',
-                'Ácido acetilsalicílico', 'Omeprazol'
-            ]),
-
+            'sustancia_activa' => $faker->word,
             'concentracion' => $faker->randomElement(['100', '250', '500']),
             'unidad' => 'mg',
-
-            'presentacion' => $faker->randomElement([
-                'Tabletas', 'Cápsulas', 'Jarabe', 'Inyección'
-            ]),
-
-            'cantidad_presentacion' => $faker->numberBetween(10, 30),
-
+            'presentacion' => $faker->randomElement(['Tabletas', 'Cápsulas', 'Jarabe']),
+            'cantidad_presentacion' => rand(10, 30),
             'requiere_receta' => $faker->boolean,
-
             'descripcion_general' => $faker->sentence,
-
-            // importante: sin imagen por ahora
-            'imagen_url' => ''
+            'imagen_url' => null
         ]);
 
-        // ============================
-        // 2. CREAR INVENTARIO
-        // ============================
+        //  INVENTARIO LIGADO PERO SEGURO
         Inventario::create([
             'farmacia_id' => 1,
             'medicamento_id' => $medicamento->id,
-            'distribuidor_id' => 1,
-            'stock' => $faker->numberBetween(10, 200),
+            'distribuidor_id' => 2,
+            'stock' => rand(20, 150),
             'stock_minimo' => 5,
             'precio_compra' => $faker->randomFloat(2, 5, 50),
             'precio_venta' => $faker->randomFloat(2, 60, 150),
@@ -197,16 +178,18 @@ class FakerController extends Controller
         ]);
     }
 
-    return "Medicamentos fake generados correctamente.";
+    return " Medicamentos + inventario generados correctamente";
 }
 
 public function dashboardFarmacia(Request $request)
 {
+    $faker = \Faker\Factory::create('es_MX'); //  FALTABA
+
     $mes = $request->query('mes');
 
     $inventarios = Inventario::with('medicamento')->get();
     $doctores = \App\Models\Doctor::pluck('id');
-    $consultas = Consulta::pluck('id'); // solo IDs
+    $consultas = Consulta::pluck('id');
 
     if ($inventarios->isEmpty()) {
         return response()->json(['error' => 'No hay inventario registrado']);
@@ -217,9 +200,9 @@ public function dashboardFarmacia(Request $request)
     }
 
     // =========================
-    // 1. CREAR RECETAS FAKE
+    // 1. RECETAS (MEJORADAS)
     // =========================
-    for ($i = 0; $i < 30; $i++) {
+    for ($i = 0; $i < 40; $i++) {
 
         try {
 
@@ -227,14 +210,19 @@ public function dashboardFarmacia(Request $request)
                 ? $consultas->random()
                 : null;
 
-            $fechaRandom = now()->subDays(rand(0, 365));
+            //  CLAVE: TIPOS DE FECHA
+            if ($i < 15) {
+                $fechaRandom = now(); // HOY
+            } else {
+                $fechaRandom = now()->subDays(rand(1, 90)); // HISTORIAL
+            }
 
             $receta = \App\Models\Receta::create([
                 'consulta_id' => $consultaId,
                 'doctor_id' => $doctores->random(),
-                'paciente_id' => 1, // fijo para demo
+                'paciente_id' => 1,
                 'farmacia_id' => 1,
-                'estado' => 'pendiente',
+                'estado' => $faker->randomElement(['pendiente', 'entregada']),
                 'creado_en' => $fechaRandom
             ]);
 
@@ -269,11 +257,9 @@ public function dashboardFarmacia(Request $request)
 
         for ($i = 0; $i < rand(1, 2); $i++) {
 
-            $fecha = now()->subDays(rand(0, 365));
+            $fecha = now()->subDays(rand(0, 120));
 
             if ($mes && $fecha->format('Y-m') !== $mes) continue;
-
-            $receta = \App\Models\Receta::inRandomOrder()->first();
 
             \App\Models\MovimientoInventario::create([
                 'inventario_id' => $inv->id,
@@ -281,7 +267,7 @@ public function dashboardFarmacia(Request $request)
                 'cantidad' => rand(5, 50),
                 'motivo' => 'Generado automático',
                 'proveedor_id' => $inv->distribuidor_id,
-                'receta_id' => $receta?->id,
+                'receta_id' => \App\Models\Receta::inRandomOrder()->value('id'),
                 'usuario_id' => 1,
                 'fecha_movimiento' => $fecha,
             ]);
@@ -312,19 +298,15 @@ public function dashboardFarmacia(Request $request)
     });
 
     // =========================
-    // 4. RECETAS
+    // 4. RECETAS (SEPARADAS )
     // =========================
-    $recetas = \App\Models\Receta::with('detalles.medicamento')
-        ->get()
-        ->map(function ($r) {
-            return [
-                'id' => $r->id,
-                'paciente' => 'Paciente Demo',
-                'medicamento' => optional($r->detalles->first())->medicamento->nombre ?? 'N/A',
-                'hora' => optional($r->creado_en)->format('H:i') ?? now()->format('H:i'),
-                'prioridad' => rand(0, 1) ? 'Urgente' : 'Normal',
-            ];
-        });
+    $recetasHoy = \App\Models\Receta::whereDate('creado_en', now())
+        ->with('detalles.medicamento')
+        ->get();
+
+    $historial = \App\Models\Receta::whereDate('creado_en', '<', now())
+        ->limit(20)
+        ->get();
 
     // =========================
     // 5. INVENTARIO
@@ -356,11 +338,36 @@ public function dashboardFarmacia(Request $request)
         });
 
     return response()->json([
-        'mensaje' => 'Datos demo generados correctamente',
+        'mensaje' => ' Dashboard PRO listo',
         'movimientos' => $movimientos,
-        'recetas' => $recetas,
+        'recetas_hoy' => $recetasHoy,
+        'historial' => $historial,
         'inventario' => $inventario,
         'consumo' => $consumo
+    ]);
+}
+
+
+public function generarCaducidadDemo()
+{
+    $inventarios = \App\Models\Inventario::with('medicamento')->get();
+
+    if ($inventarios->isEmpty()) {
+        return response()->json(['error' => 'No hay inventario']);
+    }
+
+    foreach ($inventarios as $inv) {
+
+        // Generar fechas cercanas y lejanas
+        $dias = rand(1, 60);
+
+        $inv->update([
+            'fecha_caducidad' => now()->addDays($dias)
+        ]);
+    }
+
+    return response()->json([
+        'mensaje' => 'Caducidad generada correctamente'
     ]);
 }
 }

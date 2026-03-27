@@ -10,13 +10,11 @@ use App\Http\Controllers\EspecialidadController;
 use App\Http\Controllers\DistribuidorController;
 use App\Http\Controllers\AltaPacienteController;
 use App\Http\Controllers\ConsultaController;
-
 use App\Http\Controllers\DashboardFarmaciaController;
 
 
-
 //Dashboard Farmacia
-\Route::get('/dashboard-farmacia', [DashboardFarmaciaController::class, 'index']);
+Route::get('/dashboard-farmacia', [DashboardFarmaciaController::class, 'index']);
 
 ////////especialidades//////////
 Route::get('/especialidades', [EspecialidadController::class, 'index']);
@@ -49,7 +47,7 @@ Route::get('/categorias', [MedicamentoController::class, 'categorias']);
 Route::post('/distribuidores', [DistribuidorController::class, 'addDistribuidor']);
 Route::get('/MostrarDistribuidor', [DistribuidorController::class, 'getApiDistribuidor']);
 Route::delete('/DeleteDistribuidor/{id}', [DistribuidorController::class, 'deleteDistribuidor']);
-
+Route::get('/distribuidores/select', [DistribuidorController::class, 'getDistribuidoresSelect']);
 Route::put("UpdateDistribuidor/{id}",[DistribuidorController::class, "putApiUpdateDistribuidor"]);
 
 
