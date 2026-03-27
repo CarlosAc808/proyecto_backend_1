@@ -257,4 +257,10 @@ break;
     return response()->json($categorias);
 }
 
+public function index()
+{
+    return response()->json(
+        \App\Models\Medicamento::select('id', 'nombre')->get()
+    );
+} 
 }

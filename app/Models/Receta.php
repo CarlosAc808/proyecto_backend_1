@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Paciente;
+use App\Models\Consulta;
+use App\Models\RecetaDetalle;
 
 class Receta extends Model
 {

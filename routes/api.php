@@ -6,11 +6,20 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MedicamentoController;
 use App\Http\Controllers\EspecialidadController;
-
+use App\Http\Controllers\MovimientoInventarioController;
 use App\Http\Controllers\DistribuidorController;
 use App\Http\Controllers\AltaPacienteController;
 use App\Http\Controllers\ConsultaController;
 use App\Http\Controllers\DashboardFarmaciaController;
+use App\Http\Controllers\RecetaController;
+
+///////////RUTAS MOVIMIENTO INVENTARIO//////////
+Route::get('/medicamentosselct', [MedicamentoController::class, 'index']);
+Route::get('/proveedores', [DistribuidorController::class, 'proveedores']);
+Route::get('/recetas', [RecetaController::class, 'recetas']);
+Route::get('/movimientos', [MovimientoInventarioController::class, 'index']);
+Route::post('/guardarMovimientos', [MovimientoInventarioController::class, 'store']);
+///////////RUTAS MOVIMIENTO INVENTARIO//////////
 
 
 //Dashboard Farmacia
