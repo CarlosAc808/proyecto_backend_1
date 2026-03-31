@@ -12,6 +12,12 @@ use App\Http\Controllers\AltaPacienteController;
 use App\Http\Controllers\ConsultaController;
 use App\Http\Controllers\DashboardFarmaciaController;
 use App\Http\Controllers\RecetaController;
+use App\Http\Controllers\CitaController;
+
+
+Route::get('/pacientes-doctor/{doctor_id}', [CitaController::class, 'pacientesPorDoctor']);
+Route::post('/citas', [CitaController::class, 'store']);
+Route::get('/citas-doctor/{doctor_id}', [CitaController::class, 'citasPorDoctor']);
 
 ///////////RUTAS MOVIMIENTO INVENTARIO//////////
 Route::get('/medicamentosselct', [MedicamentoController::class, 'index']);
