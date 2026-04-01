@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
 
-class MedicamentoController extends Controller
+class UsuarioController extends Controller
 {
     public function obtenerFotoUsuario($nombre)
 {

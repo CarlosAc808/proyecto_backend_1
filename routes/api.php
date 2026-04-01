@@ -15,6 +15,10 @@ use App\Http\Controllers\RecetaController;
 use App\Http\Controllers\CitaController;
 use App\Http\Controllers\UsuarioController;
 
+use App\Http\Controllers\NotificacionesController;
+Route::get('/paciente/doctor/{usuario_id}', [CitaController::class, 'obtenerDoctorPaciente']);
+Route::get('/citas/paciente/{paciente_id}', [CitaController::class, 'citasDelDoctorPorPaciente']);
+Route::post('/citas/paciente', [CitaController::class, 'storeDesdePaciente']);
 Route::get('/tratamientos-largos/{doctor_id}', [ConsultaController::class, 'tratamientosLargos']);
 Route::get('/usuario/foto/{nombre}', [UsuarioController::class, 'obtenerFotoUsuario']);
 
@@ -87,6 +91,19 @@ Route::post('/finalizar-consulta', [ConsultaController::class, 'finalizarConsult
 ///erick
 Route::get('/consultas/{pacienteId}', [ConsultaController::class, 'getByPaciente']);
 use App\Http\Controllers\PerfilController;
+
+Route::post('/perfil/actualizar', [PerfilController::class, 'actualizarPerfil']);
+
+// Obtener notificaciones del usuario
+Route::get('/notificaciones/{usuario_id}', [NotificacionesController::class, 'obtenerNotificaciones']);
+
+// Activar / desactivar notificación
+Route::post('/notificaciones/toggle', [NotificacionesController::class, 'toggleNotificacion']);
+
+Route::post('/perfil/cambiar-password', [PerfilController::class, 'cambiarPassword']);
+
+
+Route::get('/perfil/doctor/{usuario_id}', [PerfilController::class, 'obtenerDoctor']);
 
 Route::get('/perfil/{id}', [PerfilController::class, 'obtenerPerfil']);
 

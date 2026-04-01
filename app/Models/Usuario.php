@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens; //  IMPORTANTE
+use App\Models\Notificacion;
+use App\Models\UsuarioNotificacion;
 
 class Usuario extends Authenticatable
 {
@@ -35,4 +37,13 @@ class Usuario extends Authenticatable
     {
         return $this->hasOne(Paciente::class, 'usuario_id');
     }
+    public function notificaciones()
+{
+    return $this->belongsToMany(
+        Notificacion::class,
+        'usuario_notificaciones',
+        'usuario_id',
+        'notificacion_id'
+    )->withPivot('habilitado')->withTimestamps();
+}
 }

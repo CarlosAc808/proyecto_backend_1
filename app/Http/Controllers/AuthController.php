@@ -175,11 +175,16 @@ if ($request->rol_id == 3) {
         // Crear nuevo token
         $token = $usuario->createToken('token')->plainTextToken;
 
-        return response()->json([
-            'mensaje' => 'Login exitoso',
-            'usuario' => $usuario,
-            'token' => $token
-        ]);
+  return response()->json([
+    'mensaje' => 'Login exitoso',
+    'usuario' => [
+        'id' => $usuario->id,
+        'nombre' => $usuario->nombre,
+        'correo' => $usuario->correo,
+        'foto_url' => $usuario->foto_url, // CLAVE
+    ],
+    'token' => $token
+]);
     }
 
 

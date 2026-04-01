@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+Use App\Models\Especialidad;
 
 class Doctor extends Model
 {
@@ -27,5 +28,15 @@ class Doctor extends Model
     public function clinica()
     {
         return $this->belongsTo(Clinica::class);
+    }
+
+    public function especialidad()
+{
+    return $this->belongsTo(Especialidad::class, 'especialidad_id');
+}
+
+    public function pacientes()
+    {
+        return $this->hasMany(Paciente::class, 'doctor_id');
     }
 }
