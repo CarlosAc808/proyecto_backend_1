@@ -35,4 +35,9 @@ protected $fillable = [
     {
         return $this->belongsTo(Consulta::class);
     }
+
+    public function doctor()
+{
+    return $this->belongsTo(\App\Models\Doctor::class, 'doctor_id');
+}
 }

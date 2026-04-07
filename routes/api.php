@@ -16,6 +16,8 @@ use App\Http\Controllers\CitaController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\NotificacionesController;
 
+Route::get('/recetas/paciente/{id}', [ConsultaController::class, 'recetasPorPaciente']);
+Route::get('/consulta/paciente/{id}/ultima', [ConsultaController::class, 'ultimaConsultaConReceta']);
 
 Route::get('/citas/paciente/{id}/futuras', [CitaController::class, 'citasFuturas']);
 Route::get('/citas/paciente/{id}/pasadas', [CitaController::class, 'citasPasadas']);

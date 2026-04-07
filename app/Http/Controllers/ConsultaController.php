@@ -146,4 +146,33 @@ public function tratamientosLargos($doctor_id)
 
     return response()->json($tratamientos);
 }
+
+public function ultimaConsultaConReceta($paciente_id)
+{
+    $consulta = Consulta::with([
+        'receta.detalles.medicamento'
+    ])
+    ->where('paciente_id', $paciente_id)
+    ->orderBy('id', 'desc') // la más reciente
+    ->first();
+
+    return response()->json($consulta);
+}
+
+
+public function recetasPorPaciente($pacienteId)
+{
+    $recetas = Receta::with([
+        'doctor.usuario',
+        'doctor.especialidad',
+        'paciente.usuario',
+        'detalles.medicamento',
+        'detalles.medicamento.inventario' 
+    ])
+    ->where('paciente_id', $pacienteId)
+    ->orderBy('creado_en', 'desc')
+    ->get();
+
+    return response()->json($recetas);
+}
 }

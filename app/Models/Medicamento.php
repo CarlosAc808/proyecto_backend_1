@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Inventario;
 
 class Medicamento extends Model
 {
@@ -21,4 +22,9 @@ class Medicamento extends Model
     ];
 
     public $timestamps = false;
+
+    public function inventario()
+{
+    return $this->hasOne(Inventario::class, 'medicamento_id');
+}
 }
