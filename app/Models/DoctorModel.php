@@ -18,4 +18,36 @@ class DoctorModel extends Model
         'anios_exp',
         'telefono'
     ];
+
+    public function usuario()
+    {
+        return $this->belongsTo(
+            Usuario::class,
+            'usuario_id'
+        );
+    }
+
+    public function especialidad()
+    {
+        return $this->belongsTo(
+            Especialidad::class,
+            'especialidad_id'
+        );
+    }
+
+    public function horarios()
+{
+    return $this->hasMany(
+        HorarioDoctor::class,
+        'doctor_id'
+    );
+}
+
+public function consultorios()
+{
+    return $this->hasMany(
+        DoctorConsultorio::class,
+        'doctor_id'
+    );
+}
 }

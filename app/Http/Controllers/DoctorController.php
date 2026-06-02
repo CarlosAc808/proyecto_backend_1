@@ -104,4 +104,15 @@ public function store(Request $request)
         "message" => "Doctor eliminado"
     ]);
 }
+
+
+public function listarConUsuario()
+{
+    $doctores = DoctorModel::with([
+        'usuario',
+        'especialidad'
+    ])->get();
+
+    return response()->json($doctores);
+}
 }

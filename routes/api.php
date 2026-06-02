@@ -18,6 +18,47 @@ use App\Http\Controllers\NotificacionesController;
 use App\Http\Controllers\PlanesController;
 use App\Http\Controllers\SuscripcionController;
 use App\Http\Controllers\StripeController;
+use App\Http\Controllers\ConsultorioController;
+use App\Http\Controllers\TipoPagoDoctorController;
+use App\Http\Controllers\PagoDoctorController;
+use App\Http\Controllers\HorarioDoctorController;
+
+/*NUEVO*/
+
+Route::get(
+    '/pagos-doctores',
+    [PagoDoctorController::class,'index']
+);
+
+Route::post(
+    '/pagos-doctores',
+    [PagoDoctorController::class,'store']
+);
+
+Route::post(
+    '/asignar-doctor-consultorio',
+    [HorarioDoctorController::class,'store']
+);
+
+Route::delete(
+    '/pagos-doctores/{id}',
+    [PagoDoctorController::class,'destroy']
+);
+
+Route::get('/doctores-completo', [DoctorController::class,'listarConUsuario']);
+
+Route::get('/tipos-pago', [TipoPagoDoctorController::class, 'index']);
+
+Route::post('/tipos-pago', [TipoPagoDoctorController::class, 'store']);
+
+Route::delete('/tipos-pago/{id}', [TipoPagoDoctorController::class, 'destroy']);
+
+Route::get('/consultorios', [ConsultorioController::class,'index']);
+
+Route::post('/consultorios', [ConsultorioController::class,'store']);
+
+Route::post('/pagos-doctores', [PagoDoctorController::class, 'store']);
+/*Nuevo*/ 
 
 
 Route::put('/recetas/{id}', [RecetaController::class, 'actualizarEstado']);
