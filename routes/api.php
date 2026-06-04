@@ -22,6 +22,8 @@ use App\Http\Controllers\ConsultorioController;
 use App\Http\Controllers\TipoPagoDoctorController;
 use App\Http\Controllers\PagoDoctorController;
 use App\Http\Controllers\HorarioDoctorController;
+use App\Http\Controllers\MedicamentosCaducadosController;
+
 
 /*NUEVO*/
 
@@ -209,3 +211,8 @@ Route::post('/stripe-webhook', [StripeController::class, 'webhook']);
 
 
 Route::post('/pago', [StripeController::class, 'pagar']);
+
+
+
+
+Route::post('/medicamentoCaducado', [MedicamentosCaducadosController::class, 'store']);
