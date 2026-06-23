@@ -69,4 +69,10 @@ public function farmacia()
     //antes hasMany, ahora hasOne
     return $this->hasOne(Suscripciones::class, 'usuario_id');
 }
+
+    // NUEVO: Relación con el historial de pagos
+    public function pagos()
+    {
+        return $this->hasMany(HistorialPago::class, 'usuario_id');
+    }
 }

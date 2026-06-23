@@ -1,5 +1,11 @@
 <?php
 
+use App\Models\User;
+use App\Models\Usuario;
+use App\Models\HistorialPago;
+use Illuminate\Support\Facades\Hash;
+
+
 use App\Http\Controllers\DoctorController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -168,12 +174,54 @@ Route::get('/perfil/{id}', [PerfilController::class, 'obtenerPerfil']);
 
 
 
+Route::get('/probar-sistema-pagos', function () {
+    // 1. Buscamos el primer rol existente en tu base de datos para evitar el error de clave foránea
+    $rol = \DB::table('roles')->first();
 
+    if (!$rol) {
+        return response()->json([
+            'error' => 'La tabla "roles" está vacía. Por favor, asegúrate de tener al menos un rol registrado en tu base de datos antes de ejecutar la prueba.'
+        ], 400);
+    }
 
+    // 2. Buscamos el primer registro de tu tabla usuarios
+    $usuario = \App\Models\Usuario::first();
 
+    if (!$usuario) {
+        $usuario = \App\Models\Usuario::create([
+            'nombre'   => 'Usuario de Prueba',
+            'correo'   => 'test@ejemplo.com',
+            'telefono' => '123456789',
+            'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+            'rol_id'   => $rol->id, // Usamos el ID del rol que encontramos de forma segura
+            'activo'   => 0,
+            'estado'   => 'inactivo'
+        ]);
+    }
 
+    // 3. Registramos el pago en el historial
+    $pago = \App\Models\HistorialPago::create([
+        'usuario_id'  => $usuario->id,
+        'monto'       => 250.00,
+        'fecha_pago'  => now()->toDateString(),
+        'metodo_pago' => 'Tarjeta de Crédito',
+        'estado'      => 'pagado'
+    ]);
 
+    // 4. Actualizamos estados
+    $usuario->update([
+        'activo' => 1,
+        'estado' => 'activo'
+    ]);
 
+    // Cargamos la relación de pagos
+    $usuario->load('pagos');
+
+    return response()->json([
+        'mensaje' => 'Prueba realizada con éxito',
+        'usuario_con_sus_pagos' => $usuario
+    ]);
+});
 
 
 Route::get('/user', function (Request $request) {
