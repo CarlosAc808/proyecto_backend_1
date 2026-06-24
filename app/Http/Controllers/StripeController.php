@@ -1,117 +1,186 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use Illuminate\Http\Request;
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
 use App\Models\Planes;
 use App\Http\Controllers\SuscripcionController;
+use App\Http\Controllers\PagoController;
 
 class StripeController extends Controller
-{ 
-
-
-
-
-public function crearSesion(Request $request)
 {
-    $plan = Planes::find($request->plan_id);
+    public function crearSesion(Request $request)
+    {
+        $plan = Planes::find($request->plan_id);
 
-    Stripe::setApiKey(env('STRIPE_SECRET'));
+        if (!$plan) {
+            return response()->json([
+                'error' => 'Plan no encontrado'
+            ], 404);
+        }
 
-    $session = Session::create([
-        'payment_method_types' => ['card'],
-        'line_items' => [[
-            'price_data' => [
-                'currency' => 'mxn',
-                'product_data' => [
-                    'name' => $plan->nombre,
-                    'description' => 'Suscripción al plan ' . $plan->nombre . ' con acceso completo'
-                    
+        Stripe::setApiKey(env('STRIPE_SECRET'));
+
+        $session = Session::create([
+            'payment_method_types' => ['card'],
+            'line_items' => [[
+                'price_data' => [
+                    'currency' => 'mxn',
+                    'product_data' => [
+                        'name' => $plan->nombre,
+                        'description' => 'Suscripción al plan ' . $plan->nombre . ' con acceso completo'
+                    ],
+                    'unit_amount' => $plan->precio * 100,
                 ],
-                'unit_amount' => $plan->precio * 100,
+                'quantity' => 1,
+            ]],
+            'mode' => 'payment',
+
+            // IMPORTANTE: metadata también aquí
+            'payment_intent_data' => [
+                'description' => 'Pago de plan ' . $plan->nombre,
+                'metadata' => [
+                    'usuario_id' => $request->usuario_id,
+                    'plan_id' => $request->plan_id
+                ]
             ],
-            'quantity' => 1,
-        ]],
-        'mode' => 'payment',
 
-        'payment_intent_data' => [
-        'description' => 'Pago de plan ' . $plan->nombre,
-        ],
+            'success_url' => 'http://localhost:3000/success',
+            'cancel_url' => 'http://localhost:3000/cancel',
 
-        'success_url' => 'http://localhost:3000/success',
-        'cancel_url' => 'http://localhost:3000/cancel',
-
-        
-        'metadata' => [
-            'usuario_id' => $request->usuario_id,
-            'plan_id' => $request->plan_id
-        ]
-    ]);
-
-    return response()->json([
-        'url' => $session->url
-    ]);
-}
-
-
-
-public function webhook(Request $request)
-{
-    $event = json_decode($request->getContent());
-
-    if ($event->type == 'checkout.session.completed') {
-
-        $session = $event->data->object;
-
-        $fakeRequest = new Request([
-            'usuario_id' => $session->metadata->usuario_id,
-            'plan_id' => $session->metadata->plan_id
+            // metadata de la sesión
+            'metadata' => [
+                'usuario_id' => $request->usuario_id,
+                'plan_id' => $request->plan_id
+            ]
         ]);
-
-        
-        $controller = new SuscripcionController();
-        $controller->AddSuscripcion($fakeRequest);
-    }
-
-    return response()->json(['ok' => true]);
-}
-
-
-
-public function pagar(Request $request)
-{
-    \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
-
-    
-    $plan = Planes::find($request->plan_id);
-
-    if (!$plan) {
-        return response()->json(['error' => 'Plan no existe'], 404);
-    }
-
-    try {
-        
-        \Stripe\Charge::create([
-            "amount" => $plan->precio * 100, 
-            "currency" => "mxn",
-            "source" => $request->token_stripe,
-            "description" => "Pago de plan " . $plan->nombre
-        ]);
-
-        
-        $controller = new \App\Http\Controllers\SuscripcionController();
-        $controller->AddSuscripcion($request);
 
         return response()->json([
-            'status' => 'OK'
+            'url' => $session->url
         ]);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'error' => 'Pago fallido',
-            'detalle' => $e->getMessage()
-        ], 500);
     }
-}
 
+    public function webhook(Request $request)
+    {
+        $event = json_decode($request->getContent());
+
+        // =========================
+        // 1) PAGO EXITOSO
+        // =========================
+        if ($event->type == 'checkout.session.completed') {
+            $session = $event->data->object;
+
+            $usuarioId = $session->metadata->usuario_id ?? null;
+            $planId = $session->metadata->plan_id ?? null;
+
+            $plan = Planes::find($planId);
+
+            if ($usuarioId && $plan) {
+                // Registrar pago exitoso
+                $pagoRequest = new Request([
+                    'usuario_id'   => $usuarioId,
+                    'monto'        => $plan->precio,
+                    'metodo_pago'  => 'stripe',
+                    'estado_pago'  => 'pagado'
+                ]);
+
+                $pagoController = new PagoController();
+                $pagoController->registrarPago($pagoRequest);
+
+                // Crear/actualizar suscripción
+                $suscripcionRequest = new Request([
+                    'usuario_id' => $usuarioId,
+                    'plan_id'    => $planId
+                ]);
+
+                $suscripcionController = new SuscripcionController();
+                $suscripcionController->AddSuscripcion($suscripcionRequest);
+            }
+        }
+
+        // =========================
+        // 2) PAGO FALLIDO
+        // =========================
+        if ($event->type == 'payment_intent.payment_failed') {
+            $paymentIntent = $event->data->object;
+
+            $usuarioId = $paymentIntent->metadata->usuario_id ?? null;
+            $planId = $paymentIntent->metadata->plan_id ?? null;
+
+            $plan = Planes::find($planId);
+
+            if ($usuarioId && $plan) {
+                $pagoRequest = new Request([
+                    'usuario_id'   => $usuarioId,
+                    'monto'        => $plan->precio,
+                    'metodo_pago'  => 'stripe',
+                    'estado_pago'  => 'cancelado'
+                ]);
+
+                $pagoController = new PagoController();
+                $pagoController->registrarPago($pagoRequest);
+            }
+        }
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function pagar(Request $request)
+    {
+        \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+
+        $plan = Planes::find($request->plan_id);
+
+        if (!$plan) {
+            return response()->json(['error' => 'Plan no existe'], 404);
+        }
+
+        try {
+            \Stripe\Charge::create([
+                "amount" => $plan->precio * 100,
+                "currency" => "mxn",
+                "source" => $request->token_stripe,
+                "description" => "Pago de plan " . $plan->nombre
+            ]);
+
+            // 1. Registrar pago exitoso
+            $pagoRequest = new Request([
+                'usuario_id'   => $request->usuario_id,
+                'monto'        => $plan->precio,
+                'metodo_pago'  => 'stripe',
+                'estado_pago'  => 'pagado'
+            ]);
+
+            $pagoController = new PagoController();
+            $pagoController->registrarPago($pagoRequest);
+
+            // 2. Crear/actualizar suscripción
+            $controller = new SuscripcionController();
+            $controller->AddSuscripcion($request);
+
+            return response()->json([
+                'status' => 'OK',
+                'mensaje' => 'Pago registrado y suscripción activada'
+            ]);
+
+        } catch (\Exception $e) {
+            // Registrar intento fallido
+            $pagoFallido = new Request([
+                'usuario_id'   => $request->usuario_id,
+                'monto'        => $plan->precio,
+                'metodo_pago'  => 'stripe',
+                'estado_pago'  => 'cancelado'
+            ]);
+
+            $pagoController = new PagoController();
+            $pagoController->registrarPago($pagoFallido);
+
+            return response()->json([
+                'error' => 'Pago fallido',
+                'detalle' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

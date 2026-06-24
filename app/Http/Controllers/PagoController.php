@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Models\Usuario;
 use App\Models\HistorialPago;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -31,7 +31,7 @@ class PagoController extends Controller
 
             // 2. Si el pago fue exitoso ('pagado'), activamos al usuario
             if ($request->estado_pago === 'pagado') {
-                $usuario = User::find($request->usuario_id);
+                $usuario = Usuario::find($request->usuario_id);
                 $usuario->update([
                     'activo' => 1,          // Campo tinyint original
                     'estado' => 'activo'    // Campo enum nuevo

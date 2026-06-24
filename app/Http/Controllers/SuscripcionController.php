@@ -57,12 +57,31 @@ if (!$suscripcion) {
 
     ///////////////Nuevo historial /////////////////
 
+
+            // Determinar tipo de cambio
+        $tipoCambio = 'CREACION';
+
+        if (!$esNuevo) {
+            $planAnteriorObj = Planes::find($planAnterior);
+
+            if ($planAnteriorObj) {
+                if ($plan->precio > $planAnteriorObj->precio) {
+                    $tipoCambio = 'UPGRADE';
+                } elseif ($plan->precio < $planAnteriorObj->precio) {
+                    $tipoCambio = 'DOWNGRADE';
+                } else {
+                    $tipoCambio = 'CAMBIO_PLAN';
+                }
+            }
+        }
+
         Historialsuscripciones::create([
     'suscripcion_id' => $suscripcion->id,
     'previous_plan_id' => $planAnterior,
     'new_plan_id' => $suscripcion->plan_id,
-    'changed_type' => $esNuevo ? 'CREACION' : 'CAMBIO_PLAN',
+    //'changed_type' => $esNuevo ? 'CREACION' : 'CAMBIO_PLAN',
     //'changed_type' => $planAnterior ? 'CAMBIO_PLAN' : 'CREACION',
+    'changed_type' => $tipoCambio,
     'created_at' => now()
 ]);
 
