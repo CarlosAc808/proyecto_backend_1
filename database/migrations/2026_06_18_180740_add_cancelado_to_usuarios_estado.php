@@ -10,22 +10,21 @@ return new class extends Migration
      * Run the migrations.
      */
     
-    public function up(): void
-    {
-        Schema::table('usuarios', function (Blueprint $table) {
-            // Modificamos el ENUM para incluir 'cancelado'
-            $table->enum('estado', ['activo', 'inactivo', 'cancelado'])
-            ->default('activo')
-            ->change();
-            });
-            }
-            
-            public function down(): void
-            {
-                Schema::table('usuarios', function (Blueprint $table) {
-                    $table->enum('estado', ['activo', 'inactivo'])
-                    ->default('activo')
-                    ->change();
-                    });
-                    }
+public function up(): void
+{
+    Schema::table('usuarios', function (Blueprint $table) {
+        $table->enum('estado', [
+            'activo',
+            'inactivo',
+            'cancelado'
+        ])->default('activo');
+    });
+}
+
+public function down(): void
+{
+    Schema::table('usuarios', function (Blueprint $table) {
+        $table->dropColumn('estado');
+    });
+}
 };
