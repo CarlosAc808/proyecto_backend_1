@@ -32,7 +32,7 @@ use App\Http\Controllers\MedicamentosCaducadosController;
 use App\Http\Controllers\HabitacionController;
 use App\Http\Controllers\InstrumentoMedicoController;
 use App\Http\Controllers\ConsultorioInstrumentoController;
-
+use App\Http\Controllers\OrdenCompraController;
 
 /*NUEVO*/
 
@@ -287,5 +287,14 @@ Route::post('/medicamentoCaducado', [MedicamentosCaducadosController::class, 'st
 Route::get('/getcaducados', [MedicamentosCaducadosController::class, 'getCaducados']);
 
 
+
+
+//----------------------------------NUEVO
+
+
+Route::post('/ordenes-compra', [OrdenCompraController::class, 'addOrdenCompra']);
+Route::get('/ordenes-compra', [OrdenCompraController::class, 'getOrdenesCompra']);
+Route::get('/ordenes-compra/{id}', [OrdenCompraController::class, 'getOrdenCompra']);
+Route::delete('/ordenes-compra/{id}', [OrdenCompraController::class, 'deleteOrdenCompra']);
 
 
