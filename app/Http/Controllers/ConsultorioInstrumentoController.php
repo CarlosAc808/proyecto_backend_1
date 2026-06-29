@@ -7,9 +7,17 @@ use Illuminate\Http\Request;
 
 class ConsultorioInstrumentoController extends Controller
 {
-    public function index()
+  public function index()
     {
         return ConsultorioInstrumento::all();
+    }
+
+    public function inventario()
+    {
+        return ConsultorioInstrumento::with([
+            'consultorio',
+            'instrumento'
+        ])->get();
     }
 
     public function store(Request $request)

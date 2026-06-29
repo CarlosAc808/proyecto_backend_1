@@ -45,11 +45,18 @@ Route::apiResource(
     'instrumentos',
     InstrumentoMedicoController::class
 );
-
+Route::get(
+    '/consultorio-instrumentos/inventario',
+    [ConsultorioInstrumentoController::class, 'inventario']
+);
 Route::apiResource(
     'consultorio-instrumentos',
     ConsultorioInstrumentoController::class
 );
+
+
+Route::get('/consultorio-instrumentos',[ConsultorioInstrumentoController::class, 'index']);
+
 
 
 
