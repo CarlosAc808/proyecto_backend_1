@@ -19,7 +19,7 @@ class DistribuidorController extends Controller
      public function proveedores()
     {
         return response()->json(
-            Distribuidor::select('id', 'nombre')->get()
+            Distribuidor::select('id', 'nombre','rfc','direccion','telefono','contacto','ciudad')->get()
         );
     }
 

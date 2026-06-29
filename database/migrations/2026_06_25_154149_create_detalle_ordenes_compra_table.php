@@ -29,6 +29,7 @@ return new class extends Migration
 
             $table->integer('unidades');
             $table->text('descripcion')->nullable();
+            $table->decimal('precio', 8, 2);
 
             $table->timestamps();
         });

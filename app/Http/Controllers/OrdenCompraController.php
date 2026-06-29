@@ -38,6 +38,7 @@ class OrdenCompraController extends Controller
             $detalle->orden_compra_id = $orden->id;
             $detalle->unidades = $med['unidades'] ?? 0;
             $detalle->descripcion = $med['descripcion'] ?? null;
+            $detalle->precio = $med['precio'] ?? 0;
 
             // Caso 1: el usuario eligió "Otro medicamento"
             if (($med['medicamento_id'] ?? '') === 'otro') {
