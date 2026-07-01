@@ -20,7 +20,7 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => ['http://localhost:5173',
-    'https://TU-FRONTEND.vercel.app', // aquí va tu dominio de Vercel cuando lo tengas
+    'https://proyecto-frontend-seven.vercel.app', // aquí va tu dominio de Vercel cuando lo tengas
     ],
 
     'allowed_origins_patterns' => [],
