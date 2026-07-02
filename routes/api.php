@@ -30,6 +30,9 @@ use App\Http\Controllers\PagoDoctorController;
 use App\Http\Controllers\HorarioDoctorController;
 use App\Http\Controllers\MedicamentosCaducadosController;
 use App\Http\Controllers\AsistenciaController;
+use App\Http\Controllers\HabitacionController;
+use App\Http\Controllers\InstrumentoMedicoController;
+use App\Http\Controllers\ConsultorioInstrumentoController;
 
 
 /*NUEVO*/
