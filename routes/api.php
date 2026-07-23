@@ -29,12 +29,14 @@ use App\Http\Controllers\TipoPagoDoctorController;
 use App\Http\Controllers\PagoDoctorController;
 use App\Http\Controllers\HorarioDoctorController;
 use App\Http\Controllers\MedicamentosCaducadosController;
+use App\Http\Controllers\AsistenciaController;
 use App\Http\Controllers\HabitacionController;
 use App\Http\Controllers\InstrumentoMedicoController;
 use App\Http\Controllers\ConsultorioInstrumentoController;
 use App\Http\Controllers\OrdenCompraController;
 
 /*NUEVO*/
+
 
 Route::apiResource(
     'habitaciones',
@@ -201,59 +203,9 @@ Route::get('/perfil/{id}', [PerfilController::class, 'obtenerPerfil']);
 
 
 
-Route::get('/probar-sistema-pagos', function () {
-    // 1. Buscamos el primer rol existente en tu base de datos para evitar el error de clave foránea
-    $rol = \DB::table('roles')->first();
-
-    if (!$rol) {
-        return response()->json([
-            'error' => 'La tabla "roles" está vacía. Por favor, asegúrate de tener al menos un rol registrado en tu base de datos antes de ejecutar la prueba.'
-        ], 400);
-    }
-
-    // 2. Buscamos el primer registro de tu tabla usuarios
-    $usuario = \App\Models\Usuario::first();
-
-    if (!$usuario) {
-        $usuario = \App\Models\Usuario::create([
-            'nombre'   => 'Usuario de Prueba',
-            'correo'   => 'test@ejemplo.com',
-            'telefono' => '123456789',
-            'password' => \Illuminate\Support\Facades\Hash::make('password123'),
-            'rol_id'   => $rol->id, // Usamos el ID del rol que encontramos de forma segura
-            'activo'   => 0,
-            'estado'   => 'inactivo'
-        ]);
-    }
-
-    // 3. Registramos el pago en el historial
-    $pago = \App\Models\HistorialPago::create([
-        'usuario_id'  => $usuario->id,
-        'monto'       => 250.00,
-        'fecha_pago'  => now()->toDateString(),
-        'metodo_pago' => 'Tarjeta de Crédito',
-        'estado'      => 'pagado'
-    ]);
-
-    // 4. Actualizamos estados
-    $usuario->update([
-        'activo' => 1,
-        'estado' => 'activo'
-    ]);
-
-    // Cargamos la relación de pagos
-    $usuario->load('pagos');
-
-    return response()->json([
-        'mensaje' => 'Prueba realizada con éxito',
-        'usuario_con_sus_pagos' => $usuario
-    ]);
-});
 
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+
 
 Route::get('/doctores',[DoctorController::class,'index']);
 Route::post('/doctores',[DoctorController::class,'store']);
@@ -274,11 +226,6 @@ Route::post('/pacientes', [PacienteController::class, 'store'])
     ->middleware('check.suscripcion');
 */
 
-Route::post('/test', function () {
-    return response()->json([
-        'message' => 'Acceso permitido'
-    ]);
-})->middleware('check.suscripcion');
 
 
 Route::post('/stripe-session', [StripeController::class, 'crearSesion']);
@@ -294,14 +241,23 @@ Route::post('/medicamentoCaducado', [MedicamentosCaducadosController::class, 'st
 Route::get('/getcaducados', [MedicamentosCaducadosController::class, 'getCaducados']);
 
 
+///erick
+
+Route::get('/doctores', [DoctorController::class, 'index']);
+
+Route::get('/especialidades', [DoctorController::class, 'getEspecialidades']);
+
+// Historial global para el módulo de clínicas
+Route::get('/clinic/asistencias', [AsistenciaController::class, 'clinicIndex']);
+
+// Acciones de autogestión de asistencia del doctor
+Route::post('/asistencias', [AsistenciaController::class, 'stores']);
+Route::get('/doctores/{id}/asistencias', [AsistenciaController::class, 'doctorIndex']);
 
 
-//----------------------------------NUEVO
 
 
 Route::post('/ordenes-compra', [OrdenCompraController::class, 'addOrdenCompra']);
 Route::get('/ordenes-compra', [OrdenCompraController::class, 'getOrdenesCompra']);
 Route::get('/ordenes-compra/{id}', [OrdenCompraController::class, 'getOrdenCompra']);
 Route::delete('/ordenes-compra/{id}', [OrdenCompraController::class, 'deleteOrdenCompra']);
-
-

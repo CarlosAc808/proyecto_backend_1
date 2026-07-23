@@ -9,22 +9,21 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    
-public function up(): void
-{
-    Schema::table('usuarios', function (Blueprint $table) {
-        $table->enum('estado', [
-            'activo',
-            'inactivo',
-            'cancelado'
-        ])->default('activo');
-    });
-}
+    public function up(): void
+    {
+        Schema::table('usuarios', function (Blueprint $table) {
+            $table->enum('estado', [
+                'activo',
+                'inactivo',
+                'cancelado'
+            ])->default('activo');
+        });
+    }
 
-public function down(): void
-{
-    Schema::table('usuarios', function (Blueprint $table) {
-        $table->dropColumn('estado');
-    });
-}
+    public function down(): void
+    {
+        Schema::table('usuarios', function (Blueprint $table) {
+            $table->dropColumn('estado');
+        });
+    }
 };

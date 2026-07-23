@@ -8,6 +8,8 @@ use App\Models\DoctorModel;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Especialidad;
+
 
 class DoctorController extends Controller
 {
@@ -79,40 +81,54 @@ public function store(Request $request)
         ], 500);
     }
 }
-    //////////////////////////////
-        public function index()
+       // 2. NUEVO INDEX UNIFICADO: Obtener doctores, relaciones y presencia en tiempo real
+    public function index()
     {
-        return response()->json(DoctorModel::all());
-        ////////////////////////
+        // Traemos los doctores con sus relaciones
+        $doctores = DoctorModel::with(['usuario', 'especialidad'])->get();
+
+        foreach ($doctores as $doctor) {
+            // Evaluamos si tiene una entrada sin salida registrada en la tabla asistencias
+            $activo = $doctor->asistencias()
+                ->whereNull('hora_salida')
+                ->exists();
+
+            // Seteamos el estado dinámico que leerá React
+            $doctor->estado_asistencia = $activo ? 'dentro' : 'fuera';
+        }
+
+        return response()->json($doctores);
     }
-    public function update(Request $request, $id){
+
+    // 3. Actualizar datos del doctor
+    public function update(Request $request, $id)
+    {
         $doctor = DoctorModel::findOrFail($id);
         $doctor->update($request->all());
 
-        return response ()->json([
+        return response()->json([
             "message" => "Doctor actualizado",
-            "data"=> $doctor
+            "data" => $doctor
         ]);
     }
-    /////////////////
+
+    // 4. Eliminar doctor
     public function destroy($id)
-{
-    $doctor = DoctorModel::findOrFail($id);
-    $doctor->delete();
+    {
+        $doctor = DoctorModel::findOrFail($id);
+        $doctor->delete();
 
-    return response()->json([
-        "message" => "Doctor eliminado"
-    ]);
-}
+        return response()->json([
+            "message" => "Doctor eliminado"
+        ]);
+    }
 
+    // 5. Catálogo de especialidades para los selects del frontend
+    public function getEspecialidades()
+    {
+        $especialidades = Especialidad::all();
+        return response()->json($especialidades);
+    }
+ 
 
-public function listarConUsuario()
-{
-    $doctores = DoctorModel::with([
-        'usuario',
-        'especialidad'
-    ])->get();
-
-    return response()->json($doctores);
-}
 }

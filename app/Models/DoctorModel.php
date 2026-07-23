@@ -50,4 +50,11 @@ public function consultorios()
         'doctor_id'
     );
 }
+public function asistencias()
+{
+    // Usamos el namespace completo de Asistencia para evitar errores de importación
+    return $this->hasMany(\App\Models\Asistencia::class, 'doctor_id');
+}
+
+
 }
